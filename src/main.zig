@@ -6,9 +6,6 @@ const ListenError = error{
 };
 
 pub fn main() anyerror!void {
-    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
-    const allocator = &gpa.allocator;
-
     const hints = os.addrinfo{
         .flags = os.system.AI_NUMERICSERV,
         .family = os.AF_UNSPEC,
@@ -49,8 +46,8 @@ pub fn main() anyerror!void {
     const bytes_received = try os.recv(new_sockfd, &buffer, 0);
 
     const msg = buffer[0..bytes_received];
-    std.debug.print("\nReceived: {s}\n", .{msg});
+    std.debug.print("\nReceived: {any} bytes: {s}\n", .{ bytes_received, msg });
 
     const bytes_sent = try os.send(new_sockfd, msg, 0);
-    std.debug.print("\nSent: {any}\n", .{bytes_sent});
+    std.debug.print("\nSent: {any} bytes: {s}\n", .{ bytes_sent, msg });
 }
