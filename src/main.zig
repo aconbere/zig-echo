@@ -6,6 +6,10 @@ const ListenError = error{
 };
 
 pub fn main() anyerror!void {
+    const port = "9999";
+    const host = "0.0.0.0";
+    const buffer_size = 100;
+
     const hints = os.addrinfo{
         .flags = os.system.AI_NUMERICSERV,
         .family = os.AF_UNSPEC,
@@ -37,17 +41,26 @@ pub fn main() anyerror!void {
     const backlog = 20;
     try os.listen(sockfd, backlog);
 
+    std.debug.print("Starting echo server {s}:{s}\n", .{ host, port });
+
     var incoming_addr: os.sockaddr = undefined;
     var addr_len: os.socklen_t = @sizeOf(os.sockaddr);
     const new_sockfd = try os.accept(sockfd, &incoming_addr, &addr_len, 0);
     defer os.closeSocket(new_sockfd);
 
-    var buffer: [1000]u8 = undefined;
-    const bytes_received = try os.recv(new_sockfd, &buffer, 0);
+    var buffer: [buffer_size]u8 = undefined;
 
-    const msg = buffer[0..bytes_received];
-    std.debug.print("\nReceived: {any} bytes: {s}\n", .{ bytes_received, msg });
+    while (true) {
+        const bytes_received = try os.recv(new_sockfd, &buffer, 0);
+        if (bytes_received == 0) {
+            std.debug.print("Client hung up, closing", .{});
+            break;
+        }
 
-    const bytes_sent = try os.send(new_sockfd, msg, 0);
-    std.debug.print("\nSent: {any} bytes: {s}\n", .{ bytes_sent, msg });
+        const msg = buffer[0..bytes_received];
+        std.debug.print("Received: {any} bytes: {s}\n", .{ bytes_received, msg });
+
+        const bytes_sent = try os.send(new_sockfd, msg, 0);
+        std.debug.print("Sent: {any} bytes: {s}\n", .{ bytes_sent, msg });
+    }
 }
