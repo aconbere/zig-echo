@@ -1,0 +1,21 @@
+# Example TCP Echo Server in Zig
+
+A simple example to demonstrate networking with Zig
+
+## Build
+
+```bash
+> zig build
+```
+
+## Run
+
+```
+> zig-out/bin/zig-echo
+```
+
+## Testing
+
+```
+> echo "test" | nc localhost 9999
+```

@@ -1,25 +1,43 @@
 const std = @import("std");
+const builtin = @import("builtin");
 const os = std.os;
 
 const ListenError = error{
     GetAddrInfoError,
 };
 
+fn getHints() os.addrinfo {
+    return switch (builtin.os.tag) {
+        .linux => os.addrinfo{
+            .flags = os.system.AI_NUMERICSERV,
+            .family = os.AF.UNSPEC,
+            .socktype = os.SOCK.STREAM,
+            .protocol = os.IPPROTO.TCP,
+            .canonname = null,
+            .addr = null,
+            .addrlen = 0,
+            .next = null,
+        },
+        .macos => os.addrinfo{
+            .flags = 0,
+            .family = os.AF.UNSPEC,
+            .socktype = os.SOCK.STREAM,
+            .protocol = os.IPPROTO.TCP,
+            .canonname = null,
+            .addr = null,
+            .addrlen = 0,
+            .next = null,
+        },
+        else => 0,
+    };
+}
+
 pub fn main() anyerror!void {
     const port = "9999";
     const host = "0.0.0.0";
     const buffer_size = 100;
 
-    const hints = os.addrinfo{
-        .flags = os.system.AI_NUMERICSERV,
-        .family = os.AF_UNSPEC,
-        .socktype = os.SOCK_STREAM,
-        .protocol = os.IPPROTO_TCP,
-        .canonname = null,
-        .addr = null,
-        .addrlen = 0,
-        .next = null,
-    };
+    const hints = getHints();
 
     var res: *os.addrinfo = undefined;
 
