@@ -71,7 +71,7 @@ pub fn main() anyerror!void {
     while (true) {
         const bytes_received = try os.recv(new_sockfd, &buffer, 0);
         if (bytes_received == 0) {
-            std.debug.print("Client hung up, closing", .{});
+            std.debug.print("Client hung up, closing\n", .{});
             break;
         }
 
